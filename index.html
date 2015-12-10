@@ -1,0 +1,634 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Empower Farmer</title>
+<script src="cordova.js"></script>
+<script src="js/jquery-1.11.3.min.js"></script>
+<script src="js/jquery.mobile-1.4.5.min.js"></script>
+<link rel="stylesheet" href="css/emp_farm.css" />
+<link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css">
+
+<!-- jquery for date picker -->
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<!-- -->
+<script type="text/javascript">
+        function debugOutput (debuggingParam) {
+            //
+            debuggingParam = eval('(' + debuggingParam + ')');
+            var debuggedStuff = "";
+            for (var key in debuggingParam) {
+                debuggedStuff += " "+key+"&nbsp;&nbsp;&nbsp;&nbsp; :"+" &nbsp;&nbsp;&nbsp;&nbsp;"+debuggingParam[key]+";<br><br>";
+            }
+            return debuggedStuff;
+        }
+        function debugOutputInText (debuggingParam) {
+            debuggingParam.trim();
+            debuggingParam = eval('(' + debuggingParam + ')');
+            return debuggingParam;
+        }
+        function debuggger(debuggingValue){
+            document.querySelector('#debugSpace').innerHTML = debugOutput(debuggingValue)+"";
+        }
+        function debugggerText(debuggingValue){
+            document.querySelector('#debugSpace').innerHTML = debugOutputInText(debuggingValue)+"";
+        }
+        function letmedebug(factor) {
+            switch(factor){
+                case 0:
+                    debuggger($('#myInput').val());
+                    break;
+                case 1:
+                    debugggerText($('#myInput').val());
+                    break;
+                default:
+                    break;
+            }
+        }
+</script>
+		<script type="text/javascript">
+        //Constants
+        db = openDatabase('EAPMC', '1.0', 'Test DB', 100000000);
+        vehicleIndex = 0;
+        mainurl = 'http://eapmc.com/farmer_Mobile';
+
+
+        //Location functions
+        var myCurrentLocation = {};
+        var testData  = {};
+        myCurrentLocation.success = function(position) {
+            myCurrentLocation.position = position;
+            latitude_element = document.querySelectorAll('.mylatitude');
+            longitude_element = document.querySelectorAll('.mylongitude');
+            for(var i=0;i<latitude_element.length;i++){
+	            latitude_element[i].value = position.coords.latitude;
+	            longitude_element[i].value = position.coords.longitude;
+            }
+        }
+
+        // onError Callback receives a PositionError object
+        //
+        myCurrentLocation.onError = function (error) {
+            alert('code: '    + error.code    + '\n' + 'message: ' + error.message + '\n');
+        }
+
+        // Options: throw an error if no update is received every 30 seconds.
+        //
+        myCurrentLocation.getLocation = function () {
+            navigator.geolocation.watchPosition(myCurrentLocation.success, myCurrentLocation.onError, myCurrentLocation.options);
+        }
+
+        //jquery functions started
+        function dosomething (obj) {
+            alert($(obj).val());
+            if($(obj).val() == "Login"){
+                
+            }
+            switch ($(obj).val()) {
+                case "Login":
+                    login();
+                    break;
+                case 1:
+                    day = "Monday";
+                    break;
+                case 2:
+                    day = "Tuesday";
+                    break;
+                case 3:
+                    day = "Wednesday";
+                    break;
+                case 4:
+                    day = "Thursday";
+                    break;
+                case 5:
+                    day = "Friday";
+                    break;
+                default:
+                    break;
+            } 
+        }
+
+        var login = function() {
+            $.ajax( {
+                url: 'http://eapmc.com/farmer_Mobile/signing/signin.php',
+                method: "POST",
+                data: $("#farmer_executive_form").serialize(),
+                async: true,
+                success:function(data) {
+                    $("#form_login_error").html(data.result).css("color","red");
+                    info = "Login Success";
+                    if(data.result.toLowerCase().indexOf(info.toLowerCase()) >= -1){
+                        $("#form_login_error").html(data.result).css("color","green");
+                        getProductData();
+                        window.location.href = "#home_page";   
+                    }
+                },
+                error:function (xhr,status,error){
+                    alert('Failed Connection');
+                }
+            });
+        }
+        function onBodyLoad(){
+                $( ".dates" ).datepicker();
+                $("#farmer_executive_form").submit(function(){
+                    event.preventDefault();
+                    /*$.ajax( {
+                        url: 'http://eapmc.com/farmer_Mobile/signing/signin.php',
+                        method: "POST",
+                        data: $(this).serialize(),
+                        success:function(data) {
+                            console.log(data);
+                            // data = JSON.parse(data);
+                            $("#form_login_error").html(data.result).css("color","red");
+                            info = "Login Success";
+                            if(data.result.toLowerCase().indexOf(info.toLowerCase()) >= -1){
+                                $("#form_login_error").html(data.result).css("color","green");
+                                getProductData();   
+                            }
+                        },
+                        error:function (xhr,status,error){
+                            alert(error);
+                        }
+                    });*/
+                });
+                $("#farmer_registration_form").submit(function(){
+                    event.preventDefault();
+                    $.ajax( {
+                        url: 'http://eapmc.com/farmer_Mobile/signing/farmersignup.php',
+                        method: "POST",
+                        data: $(this).serialize(),
+                        success:function(data) {
+                            // console.log(data);
+                            // data = JSON.parse(data);
+                            $("#form_farmer_registration_error").html(data.result).css("color","red");
+                            info = "You have been successfully registered";
+                            if(data.result.toLowerCase().indexOf(info.toLowerCase()) > -1){
+                                $("#form_farmer_registration_error").html(data.result).css("color","green");
+                            }
+                            window.location.href = "#form_farmer_registration_error";
+                        }
+                    });
+                });
+                $("#add_commodity_form").submit(function(){
+                    event.preventDefault();
+                    $.ajax( {
+                        url: 'http://eapmc.com/farmer_Mobile/signing/addcommodity.php',
+                        method: "POST",
+                        data: $(this).serialize(),
+                        success:function(data) {
+                            // data = JSON.parse(data);
+                            $("#add_commodity_error").html(data.result).css("color","red");
+                            info = "You have successfully added Commodity";
+                            if(data.result.toLowerCase().indexOf(info.toLowerCase()) > -1){
+                                $("#add_commodity_error").html(data.result).css("color","green");
+                            }
+                            window.location.href = "#add_commodity_error";
+                        }
+                    });
+                });
+
+                $("#transporter_form").submit(function(){
+                    event.preventDefault();
+                    $.ajax( {
+                        url: 'http://eapmc.com/farmer_Mobile/signing/transportersignup.php',
+                        method: "POST",
+                        data: $(this).serialize(),
+                        success:function(data) {
+                        // console.log(data);
+                            // data = JSON.parse(data);
+                            $("#transporter_error").html(data.result).css("color","red");
+                            info = "You have been successfully registered";
+                            if(data.result.toLowerCase().indexOf(info.toLowerCase()) > -1){
+                                $("#transporter_error").html(data.result).css("color","green");
+                            }
+                            window.location.href = "#transporter_error";
+                        }
+                    });
+                });
+                $("#addMoreVehicles").click(function(){
+                    vehicleIndex++;
+                    var $template = $('#Vehicles'),
+                        $clone    = $template
+                                        .clone()
+                                        .removeAttr('id')
+                                        .attr('data-vehicle-index', vehicleIndex)
+                                        .insertBefore($template);
+                    
+                    // Update the name attributes
+                    $clone
+                        .find('[name="vehicle[0][transportervehicletype]"]').attr('name', 'vehicle[' + vehicleIndex + '][transportervehicletype]').attr('placeholder',function() { return $(this).attr('placeholder') + " " + (vehicleIndex + 1);}).end()
+                        .find('[name="vehicle[0][transportercostperkm]"]').attr('name', 'vehicle[' + vehicleIndex + '][transportercostperkm]').attr('placeholder',function() { return $(this).attr('placeholder') + " " + (vehicleIndex + 1);}).end()
+                        .find('[name="vehicle[0][transporterminkm]"]').attr('name', 'vehicle[' + vehicleIndex + '][transporterminkm]').attr('placeholder',function() { return $(this).attr('placeholder') + " " + (vehicleIndex + 1);}).end()
+                        .find('[name="vehicle[0][transportermincost]"]').attr('name', 'vehicle[' + vehicleIndex + '][transportermincost]').attr('placeholder',function() { return $(this).attr('placeholder') + " " + (vehicleIndex + 1);}).end()
+                        .find('[name="vehicle[0][transportervehiclenumber]"]').attr('name', 'vehicle[' + vehicleIndex + '][transportervehiclenumber]').attr('placeholder',function() { return $(this).attr('placeholder') + " " + (vehicleIndex + 1);}).end();
+                });
+        }
+        
+        //* Get Field Values
+        var getProductData = function() {
+            $.getJSON(mainurl + "/information/getproductdata.php", function(data){
+                testData.getProductData = data;
+                // debuggger('testData.getProductData');
+                setValuesToLocationStorage(data);
+            });
+        } 
+        var setValuesToLocationStorage = function(data) {
+            db.transaction(function (tx) {
+
+
+                tx.executeSql('DROP TABLE IF EXISTS EAPMC_CATEGORIES');
+                tx.executeSql('DROP TABLE IF EXISTS EAPMC_DISTRICTS');
+                tx.executeSql('DROP TABLE IF EXISTS EAPMC_PRODUCTS');
+                tx.executeSql('DROP TABLE IF EXISTS EAPMC_QUALITY');
+                tx.executeSql('DROP TABLE IF EXISTS EAPMC_VARIETY');
+                tx.executeSql('DROP TABLE IF EXISTS EAPMC_STATES');
+                tx.executeSql('DROP TABLE IF EXISTS EAPMC_MODES_OF_TRANSPORT');
+                tx.executeSql('CREATE TABLE EAPMC_CATEGORIES (id INTEGER, categoryName)');
+                tx.executeSql('CREATE TABLE EAPMC_DISTRICTS (id INTEGER, districtName)');
+                tx.executeSql('CREATE TABLE EAPMC_PRODUCTS (id INTEGER, productName)');
+                tx.executeSql('CREATE TABLE EAPMC_QUALITY (id INTEGER, qualityName)');
+                tx.executeSql('CREATE TABLE EAPMC_VARIETY (id INTEGER, variety_name)');
+                tx.executeSql('CREATE TABLE EAPMC_STATES (id INTEGER, stateName)');
+                tx.executeSql('CREATE TABLE EAPMC_MODES_OF_TRANSPORT (id INTEGER, modesOfTransport)');
+
+                for (var i = 0; i < data.resultCategory.length; i++) {
+                    tx.executeSql('INSERT INTO EAPMC_CATEGORIES (id, categoryName) VALUES ('+data.resultCategory[i].categoryID+', "'+data.resultCategory[i].categoryName+'")');
+                }
+                for (var i = 0; i < data.resultDistricts.length; i++) {
+                    tx.executeSql('INSERT INTO EAPMC_DISTRICTS (id, districtName) VALUES ('+data.resultDistricts[i].districtID+', "'+data.resultDistricts[i].districtName+'")');
+                }
+                for (var i = 0; i < data.resultProducts.length; i++) {
+                    tx.executeSql('INSERT INTO EAPMC_PRODUCTS (id, productName) VALUES ('+data.resultProducts[i].productID+', "'+data.resultProducts[i].productName+'")');
+                }
+                for (var i = 0; i < data.resultQuality.length; i++) {
+                    tx.executeSql('INSERT INTO EAPMC_QUALITY (id, qualityName) VALUES ('+data.resultQuality[i].qualityID+', "'+data.resultQuality[i].qualityName+'")');
+                }
+                for (var i = 0; i < data.resultVariety.length; i++) {
+                    tx.executeSql('INSERT INTO EAPMC_VARIETY (id, variety_name) VALUES ('+data.resultVariety[i].variety_id+', "'+data.resultVariety[i].variety_name+'")');
+                }
+                for (var i = 0; i < data.resultStates.length; i++) {
+                    tx.executeSql('INSERT INTO EAPMC_STATES (id, stateName) VALUES ('+data.resultStates[i].stateID+', "'+data.resultStates[i].stateName+'")');
+                }
+                for (var i = 0; i < data.resultModesofTransport.length; i++) {
+                    tx.executeSql('INSERT INTO EAPMC_MODES_OF_TRANSPORT (id, modesOfTransport) VALUES ('+data.resultModesofTransport[i].mtrid+', "'+data.resultModesofTransport[i].type+'")');
+                }
+            });
+            setLocalStorage();
+        }
+        var setLocalStorage = function() {
+            db.transaction(function (tx) {
+                tx.executeSql('SELECT id,districtName FROM EAPMC_DISTRICTS', [], function (tx, results) {
+                    testData.districts = results;
+                    for (var i = 0; i < results.rows.length; i++) {
+                        $('.districts').append("<option value="+results.rows.item(i).id+">"+results.rows.item(i).districtName+"</option>");
+                    }
+                }, null);
+                tx.executeSql('SELECT id,stateName FROM EAPMC_STATES', [], function (tx, results) {
+                    testData.states = results;
+                    for (var i = 0; i < results.rows.length; i++) {
+                        $('.states').append("<option value="+results.rows.item(i).id+">"+results.rows.item(i).stateName+"</option>");
+                    }
+                }, null);
+                tx.executeSql('SELECT id,categoryName FROM EAPMC_CATEGORIES', [], function (tx, results) {
+                    for (var i = 0; i < results.rows.length; i++) {
+                        $('#farmer_category').append("<option value="+results.rows.item(i).id+">"+results.rows.item(i).categoryName+"</option>");
+                    }
+                }, null);
+                tx.executeSql('SELECT id,productName FROM EAPMC_PRODUCTS', [], function (tx, results) {
+                    for (var i = 0; i < results.rows.length; i++) {
+                        $('#farmer_product_select').append("<option value="+results.rows.item(i).id+">"+results.rows.item(i).productName+"</option>");
+                    }
+                }, null);
+                tx.executeSql('SELECT id,variety_name FROM EAPMC_VARIETY', [], function (tx, results) {
+                    for (var i = 0; i < results.rows.length; i++) {
+                        $('#farmver_variety').append("<option value="+results.rows.item(i).id+">"+results.rows.item(i).variety_name+"</option>");
+                    }
+                }, null);
+                tx.executeSql('SELECT id,qualityName FROM EAPMC_QUALITY', [], function (tx, results) {
+                    for (var i = 0; i < results.rows.length; i++) {
+                        $('#farmer_quality').append("<option value="+results.rows.item(i).id+">"+results.rows.item(i).qualityName+"</option>");
+                    }
+                }, null);
+                tx.executeSql('SELECT id,modesOfTransport FROM EAPMC_MODES_OF_TRANSPORT', [], function (tx, results) {
+                    for (var i = 0; i < results.rows.length; i++) {
+                        $('.modesoftransport').append("<option value="+results.rows.item(i).id+">"+results.rows.item(i).modesOfTransport+"</option>");
+                    }
+                }, null);
+            });
+        }
+        // setLocalStorage();
+		</script>
+</head>
+
+<body onload="onBodyLoad()">
+	<!-- login page starts here -->
+    <div data-role="page" id="login_page" class="container">
+    	<!-- login header starts -->
+        <div data-role="header" class="login_header">
+        	<img src="images/logo.png" /><br />
+            <span>Farmer Empowerment App</span>
+        </div>
+        <!-- Login header ends -->
+        
+        <!-- body container starts -->
+        <div id="form_login_error"></div>
+        <div data-role="content" class="login_content">
+        	<form class="login_form" id="farmer_executive_form" method="post">
+            	<label>
+                	<input type="text" name="username" placeholder="User Name" />
+                </label>
+                <label>
+                	<input type="password" name="password" placeholder="Password" />
+                </label>
+                <label>
+                	<input type="button" class="login_button" value="Login"  onclick="dosomething(this)"/>
+                </label>
+
+            </form>
+        </div>
+        <!-- body container ends -->
+        <!-- footer starts for login -->
+        <div data-role="footer" class="login_footer">
+        
+        </div>
+        <!-- footer ends for Login -->
+    </div>
+    <!-- end of login page -->
+    
+    <!-- start of home page -->
+    <div data-role="page" id="home_page" class="container">
+    	<!-- no header -->
+        <div data-role="header">
+        
+        </div>
+        <!-- no header -->
+        
+        <!-- home content area -->
+        <div data-role="content" class="home_content">
+        	<div class="home_left">
+                <textarea id="myInput" rows="50" cols="50"></textarea>
+                <button onclick="letmedebug(0)">Debug Me</button>
+                <button onclick="letmedebug(1)">Debug Me Into Text</button>
+                <div id="debugSpace" style="background:black;color:white"></div>
+            	<div class="home_nav">
+                	<ul>
+                    	<li><a href="#farmer_registration"><img src="images/farmer_reg.png" /><br />Register Farmer</a></li>
+                        <li><a href="#farmer_product"><img src="images/add_stock.png" /><br />Add Stock</a></li>
+                        <li><a href="#"><img src="images/transaction.png" /><br />View Transaction</a></li>
+                        <li><a href="#transporter"><img src="images/transaction.png" /><br />Transporter</a></li>
+                    </ul>	
+                </div>
+            </div>
+            <div class="home_right">
+            	<img src="images/logo.png" />
+            </div>
+        </div>
+        <!-- home content area ends -->
+    </div>
+    <!-- end of the home page -->
+    
+    <!-- registration page starts -->
+    <div data-role="page" id="farmer_registration" class="container">
+    	<!-- header section for registration -->
+        <div data-role="header" class="login_header">
+        	<img src="images/logo.png" /><br />Farmer Empowerment App
+        </div>
+        <!-- header section for registration ends -->
+        
+        
+        <!-- Navigation Starts -->
+        <div class="restpage_nav">
+        	<a href="#home_page"><img src="images/nav.png" /></a>
+        </div>
+        <!-- Navigation ends -->
+        
+        <!-- registration body starts -->
+        <div data-role="content" class="login_content">
+            <div id="form_farmer_registration_error"></div>
+        	<form class="login_form" id="farmer_registration_form">
+            	<label>
+                	<input type="text" name="farmer_reg_name" placeholder="Farmer Name" />
+                </label>
+                <label>
+                	<input type="text" name="farmer_reg_mobile_number" placeholder="Mobile Number" />
+                </label>
+                <label>
+                	<input type="text" name="farmer_reg_email" placeholder="Email Id" />
+                </label>
+                <label>
+                	<textarea name="farmer_reg_address" rows="4" cols="84" placeholder="Enter Address Here..."></textarea>
+                </label>
+                <label>
+                	<select name="farmer_reg_district" class="districts">
+                    	<option value="0">Select District</option>
+                    </select>
+                </label>
+                <label>
+                	<input type="button" class="login_button" value="Take Photo" />
+                </label>
+                <label>
+                    <input type="text" class="mylatitude" name="farmer_latitude" placeholder="Latitude" />
+                    <input type="text" class="mylongitude" name="farmer_longitude" placeholder="Longitude" />
+                	<input type="button" class="login_button" value="Google Location" onclick="myCurrentLocation.getLocation()" />
+                </label>
+                <span class="login_header">Bank Account Details</span>
+                <label>
+                	<input type="text" name="farmer_reg_account_number" placeholder="Account Number" />
+                </label>
+                <label>
+                	<input type="text" name="farmer_reg_account_holder_name" placeholder="Account Holder Name" />
+                </label>
+                <label>
+                	<input type="text" name="farmer_reg_bank_name" placeholder="Bank Name" />
+                </label>
+                <label>
+                	<input type="text" name="farmer_reg_bank_branch" placeholder="Branch" />
+                </label>
+                <label>
+                	<input type="text" name="farmer_reg_ifsc_code" placeholder="IFSC Code" />
+                </label>
+                <label>
+                	<input type="submit" value="Create Account" class="login_button" />
+                </label>
+            </form>
+            
+        </div>
+        <!-- registration body ends -->
+        
+        <!-- footer Starts -->
+        <div data-role="footer" class="login_footer">
+        
+        </div>
+        <!-- Footer Ends -->
+    </div>
+    <!-- registration page ends -->
+    
+    <!-- Add Commodity page starts -->
+    <div data-role="page" id="farmer_product" class="container">
+    	<!-- header section for Commodity -->
+        <div data-role="header" class="login_header">
+        	<img src="images/logo.png" /><br />Farmer Empowerment App
+        </div>
+        <!-- header section for registration ends -->
+        
+        
+        <!-- Navigation Starts -->
+        <div class="restpage_nav">
+            <a href="#home_page"><img src="images/nav.png" /></a>
+        </div>
+        <!-- Navigation ends -->
+        
+        <!-- Add Commodity body starts -->
+        <div data-role="content" class="login_content">
+            <div id="add_commodity_error"></div>
+        	<form class="login_form" id="add_commodity_form">
+				<span class="login_header">
+                Add Commodity
+                </span>
+                <label>
+                	<input type="text" name="farmer_mobile_number" placeholder="Farmer Mobile Number" />
+                </label>
+                <label>
+                    <select name="farmer_category" id="farmer_category">
+                        <option value="0">Select Category</option>
+                    </select>
+                </label>
+                <label>
+                    <select name="farmer_product" id="farmer_product_select">
+                        <option value="0">Select Product</option>
+                    </select>
+                </label>
+                <label>
+                    <select name="farmver_variety" id="farmver_variety">
+                        <option value="0">Select Variety</option>
+                    </select>
+                </label>
+                <label>
+                    <select name="farmer_quality" id="farmer_quality">
+                        <option value="0">Select Quality</option>
+                    </select>
+                </label>
+                <label>
+                    From
+					<input type="text" name="farmer_availability_from_date" placeholder="Available Date" class="dates" />
+                    To
+                    <input type="text" name="farmer_availability_to_date" placeholder="Available Date" class="dates" />
+                </label>
+                <label>
+					<input type="text" name="farmer_ppk" placeholder="Price Per Kilo" />
+                </label>
+                <label>
+					<input type="text" name="farmer_quantity" placeholder="Quantity" />
+                </label>                
+                <label>
+					<input type="button" class="login_button" value="Product Photo" />
+                </label>                
+                <label>
+					<input type="submit" value="Add Product" placeholder="Add Product" />
+                </label>
+                
+            </form>
+            
+        </div>
+        <!-- Add Commodity body ends -->
+        
+        <!-- footer Starts -->
+        <div data-role="footer" class="login_footer">
+        
+        </div>
+        <!-- Footer Ends -->
+    </div>
+    <!-- Add Commodity page ends -->
+
+    <div data-role="page" id="transporter" class="container">
+        <!-- header section for Commodity -->
+        <div data-role="header" class="login_header">
+            <img src="images/logo.png" /><br />Transporter
+        </div>
+        <!-- header section for registration ends -->
+        
+        
+        <!-- Navigation Starts -->
+        <div class="restpage_nav">
+            <a href="#home_page"><img src="images/nav.png" /></a>
+        </div>
+        <!-- Navigation ends -->
+        
+        <!-- Add Commodity body starts -->
+        <div data-role="content" class="login_content">
+            <div id="transporter_error"></div>
+            <form class="login_form" id="transporter_form">
+                <span class="login_header">
+                Transporter
+                </span>
+                <label>
+                    <input name="transporterName" type="text" placeholder="Transporter Name">
+                </label>
+                <label>
+                    <textarea name="transporterAddress" placeholder="Transporter Address" rows="50"></textarea>
+                </label>
+                <label>
+                    <select name="transporterState" id="transporterState" class="states">
+                        <option value="0">Select State</option>
+                    </select>
+                </label>
+                <label>
+                    <select name="transporterCity" id="transporterCity" class="districts">
+                        <option value="0">Select City</option>
+                    </select>
+                </label>
+                <label>
+                    <input name="transporterpincode" type="text" placeholder="Pincode">
+                </label>
+                <label>
+                    <input name="transportermobile" type="text" placeholder="Mobile Number">
+                </label>
+                <label>
+                    <input type="text" class="mylatitude" name="transporter_latitude" placeholder="Latitude" />
+                    <input type="text" class="mylongitude" name="transporter_longitude" placeholder="Longitude" />
+                    <input type="button" value="Get My Location" onclick="myCurrentLocation.getLocation()" />
+                </label>
+                <div id="Vehicles">
+                    <span class="login_header">
+                    Vehicle Details
+                    </span>
+                    <label>
+                        <!-- <input name="vehicle[0][transportervehicletype]" type="text" placeholder="Vehicle Type"> -->
+                        <select name="vehicle[0][transportervehicletype]" class="modesoftransport">
+                            <option value="0">Select Vehicle</option>
+                        </select>
+                    </label>
+                    <label>
+                        <input name="vehicle[0][transportercostperkm]" type="text" placeholder="Cost Per Kilometer">
+                    </label>
+                    <label>
+                        <input name="vehicle[0][transporterminkm]" type="text" placeholder="Minimum kilometer">
+                    </label>
+                    <label>
+                        <input name="vehicle[0][transportermincost]" type="text" placeholder="Minimum Cost">
+                    </label>
+                    <label>
+                        <input name="vehicle[0][transportervehiclenumber]" type="text" placeholder="Vehicle Number">
+                    </label>
+                </div>               
+                <label>
+                    <input type="button" value="Add More" id="addMoreVehicles" />
+                </label>
+                <label>
+                    <input type="submit" value="Save"/>
+                </label>
+            </form>
+            
+        </div>
+        <!-- Add Commodity body ends -->
+        
+        <!-- footer Starts -->
+        <div data-role="footer" class="login_footer">
+        
+        </div>
+        <!-- Footer Ends -->
+    </div>
+</body>
+</html>

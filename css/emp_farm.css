@@ -1,0 +1,44 @@
+body {font-size:1.74em; color:#bababa;}
+
+img {border:0px; max-width: 100%; 
+    height: auto; z-index:-1;}
+
+.container {max-width:800px; width:100%; margin:auto;}
+
+.login_header {width:350px; margin:auto; text-align:center; color:#6fb54d; font-size:1em; margin-top:30px;}
+
+.login_content {width:80%; margin:auto; clear:both; margin-top:30px;}
+
+.login_form {}
+
+.login_form input {width:85%; padding:5%; margin-top:25px; height:20px; border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #bababa; background-color:#FFF; display:block; color:#bababa;}
+
+.login_from textarea {width:85%; padding:5%; margin-top:25px; height:40px; border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #bababa; background-color:#FFF; display:block; color:#bababa;}
+
+.login_form select {width:85%; padding:5%; padding-top:25px; height:20px; border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #bababa; background-color:#FFF; display:block; color:#bababa;}
+
+.login_form .login_button {width:95%; padding:5%; margin-top:25px; height:40px; border-radius:5px; -moz-border-radius:5px; -webkit-border-radius:5px;font-size:.8em; color:#FFF; padding-bottom:40px;}
+
+.login_form label { color:#737373; display:block; padding-bottom:10px; margin-top:20px;}
+
+.login_footer {border:0px;}
+
+.home_content {width:100%; clear:both;}
+
+.home_left {width:66%; min-height:600px; height:100%; background-color:#6fb54d; float:left; padding-top:25px;}
+
+.home_right {width:34%; float:right; padding-top:25px; text-align:center;}
+
+.home_nav {width:100%;}
+
+.home_nav ul {margin:0px; padding:0px; list-style:none;}
+
+.home_nav ul li {margin:0px; padding:0px; list-style:none;}
+
+.home_nav ul li a {float:left; margin-left:12.5%; display:inline; color:#FFF; text-decoration:none; margin-bottom:25px;}
+
+.home_nav ul li a:hover {}
+
+.reg_header {margin-top:30px; width:300px; margin:auto; clear:both;}
+
+.restpage_nav {width:61px; position:absolute; top:17px; left:12px;}
